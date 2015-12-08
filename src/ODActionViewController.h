@@ -22,21 +22,30 @@
 
 #import <UIKit/UIKit.h>
 
-typedef void(^uiactionsheetitem_block_t)(void);
+typedef void(^odactionvcitem_block_t)(void);
 
-@interface UIActionSheetItem : NSObject
-@property (nonnull, nonatomic, strong) uiactionsheetitem_block_t block;
+@interface ODActionControllerItem : NSObject
+@property (nonnull, nonatomic, strong) odactionvcitem_block_t block;
 @property (nonnull, nonatomic, strong) NSString *title;
+
 @property (nonatomic, assign, getter=isDestructive) BOOL destructive;
+@property (nonatomic, assign, getter=isBold) BOOL bold;
 
-+ (nonnull instancetype)itemWithTitle:(nonnull NSString *)title block:(nonnull uiactionsheetitem_block_t)block;
+@property (nonnull, nonatomic, strong) NSArray<ODActionControllerItem *> *subitems;
+
++ (nonnull instancetype)itemWithTitle:(nonnull NSString *)title block:(nonnull odactionvcitem_block_t)block;
 @end
 
 
-@interface UIActionSheet (ODBuilder)
-+ (nonnull instancetype)od_actionSheetWithTitle:(nullable NSString *)title actionItems:(nonnull NSArray<UIActionSheetItem *> *)items
-                              cancelButtonTitle:(nonnull NSString *)cancelButtonTitle;
+@interface ODActionViewController: UIViewController
 
-+ (nonnull instancetype)od_actionSheetWithActionItems:(nonnull NSArray<UIActionSheetItem *> *)items
-                                    cancelButtonTitle:(nonnull NSString *)cancelButtonTitle;
+- (nullable instancetype)initWithTitle:(nullable NSString *)title
+                           actionItems:(nonnull NSArray<ODActionControllerItem *> *)items
+                     cancelButtonTitle:(nonnull NSString *)cancelButtonTitle;
 @end
+
+@interface UIViewController (ODActionViewController)
+- (void)od_presentActionViewController:(UIViewController * _Nonnull)viewControllerToPresent
+                    animated:(BOOL)flag completion:(void (^ _Nullable)(void))completion;
+@end
+

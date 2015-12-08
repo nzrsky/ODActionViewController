@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
   s.name         = "ODActionViewController"
   s.version      = "1.0.0"
-  s.summary      = "Controller for custom UIActionSheet like in Map.app"
+  s.summary      = "Controller for custom UIActionSheet like in Maps.app"
   s.homepage     = "https://github.com/Rogaven/ODActionViewController"
   s.license      = { :type => 'MIT', :file => 'LICENSE.txt' }
   s.author       = { "Alexey Nazaroff" => "alexx.nazaroff@gmail.com" }

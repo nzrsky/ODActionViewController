@@ -4,7 +4,7 @@
 [![License](https://img.shields.io/cocoapods/l/ODActionViewController.svg?style=flat)](http://cocoapods.org/pods/ODActionViewController)
 [![Platform](https://img.shields.io/cocoapods/p/ODActionViewController.svg?style=flat)](http://cocoapods.org/pods/ODActionViewController)
 
-Controller for custom UIActionSheet like in Map.app.
+Controller for custom UIActionSheet like in Maps.app.
 
 ## Usage
 
