@@ -17,7 +17,7 @@ Controller for custom UIActionSheet like in Maps.app.
     // Simple single action item
     ODActionControllerItem *singleItem = [ODActionControllerItem itemWithTitle:@"Do something" block:^(id sender){
         NSLog(@"Something was done");
-    }],
+    }];
 
     // Group of items. It will be shown as single section
     ODActionControllerItem *groupItem = [ODActionControllerItem new];
@@ -38,7 +38,7 @@ Controller for custom UIActionSheet like in Maps.app.
         NSLog(@"Idx: %d", (int)sender.selectedIndex);
     };
 
-    UIViewController *vc = [[ODActionViewController alloc] initWithActionItems:@[singleItem, groupItem, segmentedItem] cancelButtonTitle:@"Cancel"];
+    UIViewController *vc = [[ODActionViewController alloc] initWithActionItems:@[segmentedItem, singleItem, groupItem] cancelButtonTitle:@"Cancel"];
     [self od_presentActionViewController:vc animated:NO completion:nil];
 }
 ```
