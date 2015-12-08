@@ -23,17 +23,15 @@
 
 #import "ODActionViewController.h"
 
-static CGFloat const kActionTableCellHeight = 42.0f;
+static CGFloat const kActionTableCellHeight = 47.0f;
 static CGFloat const kActionTableCellSpacing = 7.0f;
-static CGFloat const kActionTableBackgroundAlpha = 0.5f;
+static CGFloat const kActionTableBackgroundAlpha = 0.6f;
 
 static CGFloat const kActionTableCellSeparatorInset = 15.0f;
 
 static CGFloat const kActionTableCellAlpha = 0.6f;
 static CGFloat const kActionTableCellSeparatorWhite = 0.93f;
 
-// TODO: - appear & disap animation (table up, bg alpha)
-// TODO: - segmented control
 // TODO: - titles
 
 @implementation ODActionControllerItem
@@ -122,7 +120,7 @@ static CGFloat const kActionTableCellSeparatorWhite = 0.93f;
         }
         
         self.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
-        if (NSFoundationVersionNumber > NSFoundationVersionNumber_iOS_8_0) {
+        if (NSFoundationVersionNumber >= NSFoundationVersionNumber_iOS_8_0) {
             self.modalPresentationStyle = UIModalPresentationOverCurrentContext;
         }
     }
@@ -196,31 +194,27 @@ static CGFloat const kActionTableCellSeparatorWhite = 0.93f;
     [super viewWillAppear:animated];
 
     CGFloat newOffset = self.view.bounds.size.height - _tableView.frame.size.height;
-    if (animated) {
-        [self setTableOffset:0];
-        [UIView animateWithDuration:0.2 delay:0 options:UIViewAnimationOptionBeginFromCurrentState animations:^{
-            [self setTableOffset:newOffset];
-        } completion:nil];
-    } else {
-       [self setTableOffset:newOffset];
-    }
+    [self setTableOffset:0];
+    _tableView.tableHeaderView.alpha = 0;
+    [UIView animateWithDuration:0.2 delay:0 options:UIViewAnimationOptionBeginFromCurrentState animations:^{
+        _tableView.tableHeaderView.alpha = 1;
+        [self setTableOffset:newOffset];
+    } completion:nil];
 }
 
 
 - (void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
-    CGFloat newOffset = 0;
-    if (animated) {
-        [UIView animateWithDuration:0.2 delay:0 options:UIViewAnimationOptionBeginFromCurrentState animations:^{
-            [self setTableOffset:newOffset];
-        } completion:nil];
-    } else {
-        [self setTableOffset:newOffset];
-    }
 }
 
 - (void)dismissController {
-    [self dismissViewControllerAnimated:YES completion:nil];
+    CGFloat newOffset = 0;
+    [UIView animateWithDuration:0.2 delay:0 options:UIViewAnimationOptionBeginFromCurrentState animations:^{
+        _tableView.tableHeaderView.alpha = 0;
+        [self setTableOffset:newOffset];
+    } completion:^(BOOL finished) {
+        [self dismissViewControllerAnimated:NO completion:nil];
+    }];
 }
 
 - (CGFloat)calculateTableHeight {
@@ -302,7 +296,7 @@ static CGFloat const kActionTableCellSeparatorWhite = 0.93f;
 @implementation UIViewController (ODActionViewController)
 
 - (void)od_presentActionViewController:(UIViewController *)viewControllerToPresent
-                              animated:(BOOL)flag completion:(void (^)(void))completion {
+                              animated:(BOOL)animated completion:(void (^)(void))completion {
 //    UINavigationController *nc = [[UINavigationController alloc] initWithRootViewController:viewControllerToPresent];
 //    
 //    if (NSFoundationVersionNumber > NSFoundationVersionNumber_iOS_8_0) {
@@ -322,14 +316,14 @@ static CGFloat const kActionTableCellSeparatorWhite = 0.93f;
 //        }];
 //    }
 
-    if (NSFoundationVersionNumber > NSFoundationVersionNumber_iOS_8_0) {
-        [self setModalPresentationStyle:UIModalPresentationCurrentContext];
-        [self presentViewController:viewControllerToPresent animated:YES completion:completion];
-    } else {
-        self.providesPresentationContextTransitionStyle = YES;
-        self.definesPresentationContext = YES;
-        viewControllerToPresent.modalPresentationStyle = UIModalPresentationOverCurrentContext;
+    if (NSFoundationVersionNumber < NSFoundationVersionNumber_iOS_8_0) {
+        UIViewController *rootViewController = [UIApplication sharedApplication].delegate.window.rootViewController;
+        rootViewController.modalPresentationStyle = UIModalPresentationCurrentContext;
+//        self.providesPresentationContextTransitionStyle = YES;
+//        self.definesPresentationContext = YES;
     }
+    
+    [self presentViewController:viewControllerToPresent animated:animated completion:completion];
 }
 
 @end
