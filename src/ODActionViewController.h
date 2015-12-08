@@ -22,30 +22,41 @@
 
 #import <UIKit/UIKit.h>
 
-typedef void(^odactionvcitem_block_t)(void);
+@class ODActionControllerItem;
+typedef void(^odactionvcitem_block_t)(__kindof ODActionControllerItem * _Nonnull);
+
 
 @interface ODActionControllerItem : NSObject
-@property (nonnull, nonatomic, strong) odactionvcitem_block_t block;
-@property (nonnull, nonatomic, strong) NSString *title;
+@property (nullable, nonatomic, strong) odactionvcitem_block_t block;
+@property (nullable, nonatomic, strong) NSString *title;
 
 @property (nonatomic, assign, getter=isDestructive) BOOL destructive;
 @property (nonatomic, assign, getter=isBold) BOOL bold;
+@property (nonatomic, assign, getter=isDisabled) BOOL disabled;
 
-@property (nonnull, nonatomic, strong) NSArray<ODActionControllerItem *> *subitems;
+@property (nullable, nonatomic, strong) Class customCellClass;
+@property (nullable, nonatomic, strong) NSArray<ODActionControllerItem *> *subitems;
 
-+ (nonnull instancetype)itemWithTitle:(nonnull NSString *)title block:(nonnull odactionvcitem_block_t)block;
++ (nonnull instancetype)itemWithTitle:(nullable NSString *)title block:(nonnull odactionvcitem_block_t)block;
 @end
 
 
 @interface ODActionViewController: UIViewController
-
-- (nullable instancetype)initWithTitle:(nullable NSString *)title
-                           actionItems:(nonnull NSArray<ODActionControllerItem *> *)items
-                     cancelButtonTitle:(nonnull NSString *)cancelButtonTitle;
+- (nullable instancetype)initWithActionItems:(nonnull NSArray<ODActionControllerItem *> *)items
+                           cancelButtonTitle:(nonnull NSString *)cancelButtonTitle;
 @end
+
 
 @interface UIViewController (ODActionViewController)
 - (void)od_presentActionViewController:(UIViewController * _Nonnull)viewControllerToPresent
                     animated:(BOOL)flag completion:(void (^ _Nullable)(void))completion;
 @end
 
+@protocol ODActionViewCellDelegate <NSObject>
+- (void)dismissController;
+@end
+
+@interface ODActionViewCell: UITableViewCell
+@property (nullable, nonatomic, strong) ODActionControllerItem *item;
+@property (nullable, nonatomic, weak) NSObject<ODActionViewCellDelegate> *actionDelegate;
+@end

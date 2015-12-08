@@ -32,11 +32,13 @@ static CGFloat const kActionTableCellSeparatorInset = 15.0f;
 static CGFloat const kActionTableCellAlpha = 0.6f;
 static CGFloat const kActionTableCellSeparatorWhite = 0.93f;
 
-//static CGFloat const kActionTableCellFontSize = 14.0f;
+// TODO: - appear & disap animation (table up, bg alpha)
+// TODO: - segmented control
+// TODO: - titles
 
 @implementation ODActionControllerItem
 
-+ (nonnull instancetype)itemWithTitle:(nonnull NSString *)title block:(nonnull odactionvcitem_block_t)block {
++ (nonnull instancetype)itemWithTitle:(nullable NSString *)title block:(nonnull odactionvcitem_block_t)block {
     ODActionControllerItem *item = [[ODActionControllerItem alloc] init];
     item.title = title;
     item.block = block;
@@ -45,7 +47,7 @@ static CGFloat const kActionTableCellSeparatorWhite = 0.93f;
 
 @end
 
-@interface ODActionViewCell: UITableViewCell {
+@interface ODActionViewCell () {
     UIView *_separator;
     UIFont *_defaultFont;
     UIFont *_boldFont;
@@ -86,11 +88,17 @@ static CGFloat const kActionTableCellSeparatorWhite = 0.93f;
     self.textLabel.font = (bold) ? _boldFont : _defaultFont;
 }
 
+- (void)setItem:(ODActionControllerItem *)item {
+    _item = item;
+    
+    self.textLabel.text = item.title;
+    self.bold = item.isBold;
+}
+
 @end
 
-@interface ODActionViewController () <UITableViewDataSource, UITableViewDelegate>
+@interface ODActionViewController () <UITableViewDataSource, UITableViewDelegate, ODActionViewCellDelegate>
 @property (nonatomic, strong) NSArray<ODActionControllerItem *> *items;
-@property (nonatomic, copy) NSString *tableTitle;
 @end
 
 @implementation ODActionViewController {
@@ -98,17 +106,14 @@ static CGFloat const kActionTableCellSeparatorWhite = 0.93f;
     UIView *_blurredBackground;
 }
 
-- (nullable instancetype)initWithTitle:(nullable NSString *)title
-                                actionItems:(nonnull NSArray<ODActionControllerItem *> *)items
-                          cancelButtonTitle:(nonnull NSString *)cancelButtonTitle {
+- (nullable instancetype)initWithActionItems:(nonnull NSArray<ODActionControllerItem *> *)items
+                           cancelButtonTitle:(nonnull NSString *)cancelButtonTitle {
     if ((self = [self initWithNibName:nil bundle:nil])) {
-        
-        _tableTitle = title;
         _items = items;
         
         if (cancelButtonTitle) {
             __weak __typeof(self) self_weak_ = self;
-            ODActionControllerItem *cancelItem = [ODActionControllerItem itemWithTitle:NSLocalizedString(@"Cancel", @"Cancel button") block:^{
+            ODActionControllerItem *cancelItem = [ODActionControllerItem itemWithTitle:NSLocalizedString(@"Cancel", @"Cancel button") block:^(id sender){
                 [self_weak_ dismissController];
             }];
             cancelItem.bold = YES;
@@ -152,6 +157,13 @@ static CGFloat const kActionTableCellSeparatorWhite = 0.93f;
     _tableView.separatorColor = [UIColor clearColor];
     
     [_tableView registerClass:ODActionViewCell.class forCellReuseIdentifier:NSStringFromClass(ODActionViewCell.class)];
+    
+    for (ODActionControllerItem *item in self.items) {
+        if (item.customCellClass) {
+            [_tableView registerClass:item.customCellClass forCellReuseIdentifier:NSStringFromClass(item.customCellClass)];
+        }
+    }
+    
     [self.view addSubview:_tableView];
 
     rect.origin.y = self.view.bounds.size.height;
@@ -264,12 +276,14 @@ static CGFloat const kActionTableCellSeparatorWhite = 0.93f;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    ODActionViewCell *cell = [tableView dequeueReusableCellWithIdentifier:NSStringFromClass(ODActionViewCell.class) forIndexPath:indexPath];
     ODActionControllerItem *item = [self itemWithIndexPath:indexPath];
-    cell.textLabel.text = item.title;
-    cell.textLabel.textColor = self.view.tintColor;
+    
+    ODActionViewCell *cell = [tableView dequeueReusableCellWithIdentifier:NSStringFromClass(item.customCellClass ?: ODActionViewCell.class)
+                                                             forIndexPath:indexPath];
+    cell.item = item;
+    cell.textLabel.textColor = (item.disabled) ? [UIColor lightGrayColor] : ((item.destructive) ? [UIColor redColor] : self.view.tintColor);
     cell.showTopSeparator = indexPath.row > 0;
-    cell.bold = item.isBold;
+    cell.actionDelegate = self;
     return cell;
 }
 
@@ -278,13 +292,12 @@ static CGFloat const kActionTableCellSeparatorWhite = 0.93f;
     
     ODActionControllerItem *item = [self itemWithIndexPath:indexPath];
     
-    if (item.block) {
-        item.block();
+    if (!item.isDisabled && item.block) {
+        item.block(item);
     }
 }
 
 @end
-
 
 @implementation UIViewController (ODActionViewController)
 
