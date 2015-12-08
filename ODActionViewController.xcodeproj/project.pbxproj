@@ -26,7 +26,6 @@
 
 /* Begin PBXFileReference section */
 		FA2C30221C007E1300BD3CE5 /* libODActionViewController.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libODActionViewController.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		FA2C30341C007E3300BD3CE5 /* ODActionViewController_Tests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ODActionViewController_Tests.m; sourceTree = "<group>"; };
 		FA2C30411C0080F000BD3CE5 /* LICENSE.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE.txt; sourceTree = SOURCE_ROOT; };
 		FA2C30421C0080F000BD3CE5 /* ODActionViewController.podspec */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ODActionViewController.podspec; sourceTree = SOURCE_ROOT; };
 		FA2C30431C0080F000BD3CE5 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = SOURCE_ROOT; };
@@ -52,7 +51,6 @@
 				FA2C30421C0080F000BD3CE5 /* ODActionViewController.podspec */,
 				FA2C30431C0080F000BD3CE5 /* README.md */,
 				FA2C303D1C0080DA00BD3CE5 /* src */,
-				FA2C30331C007E3300BD3CE5 /* Tests */,
 				FA2C30231C007E1300BD3CE5 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -63,14 +61,6 @@
 				FA2C30221C007E1300BD3CE5 /* libODActionViewController.a */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		FA2C30331C007E3300BD3CE5 /* Tests */ = {
-			isa = PBXGroup;
-			children = (
-				FA2C30341C007E3300BD3CE5 /* ODActionViewController_Tests.m */,
-			);
-			path = Tests;
 			sourceTree = "<group>";
 		};
 		FA2C303D1C0080DA00BD3CE5 /* src */ = {

@@ -288,6 +288,10 @@ static CGFloat const kActionTableCellSeparatorWhite = 0.93f;
 
     if (!item.isDisabled && item.block) {
         item.block(item);
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self dismissController];
+        });
     }
 }
 
