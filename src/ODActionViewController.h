@@ -23,18 +23,23 @@
 #import <UIKit/UIKit.h>
 
 @class ODActionControllerItem;
-typedef void(^odactionvcitem_block_t)(__kindof ODActionControllerItem * _Nonnull);
 
+typedef void(^odactionvcitem_block_t)(__kindof ODActionControllerItem * _Nonnull);
 
 @interface ODActionControllerItem : NSObject
 @property (nullable, nonatomic, strong) odactionvcitem_block_t block;
 @property (nullable, nonatomic, strong) NSString *title;
 
+// Destructive buttons will be with red title
 @property (nonatomic, assign, getter=isDestructive) BOOL destructive;
+
 @property (nonatomic, assign, getter=isBold) BOOL bold;
 @property (nonatomic, assign, getter=isDisabled) BOOL disabled;
 
+// Specify class for custom cells
 @property (nullable, nonatomic, strong) Class customCellClass;
+
+// Items for group section
 @property (nullable, nonatomic, strong) NSArray<ODActionControllerItem *> *subitems;
 
 + (nonnull instancetype)itemWithTitle:(nullable NSString *)title block:(nonnull odactionvcitem_block_t)block;
@@ -48,15 +53,19 @@ typedef void(^odactionvcitem_block_t)(__kindof ODActionControllerItem * _Nonnull
 
 
 @interface UIViewController (ODActionViewController)
+// Use this method to present menu controller properly for iOS7 & iOS8+.
+// If you support iOS8+ only you can use standard `presentViewController:...` method
 - (void)od_presentActionViewController:(UIViewController * _Nonnull)viewControllerToPresent
                     animated:(BOOL)flag completion:(void (^ _Nullable)(void))completion;
 @end
 
 @protocol ODActionViewCellDelegate <NSObject>
+// Invoke this method to dismiss menu controller
 - (void)dismissController;
 @end
 
 @interface ODActionViewCell: UITableViewCell
+// You need override setItem: to configure custom cell. It will be invoked in `cellForRowAtIndexPath...`.
 @property (nullable, nonatomic, strong) ODActionControllerItem *item;
 @property (nullable, nonatomic, weak) NSObject<ODActionViewCellDelegate> *actionDelegate;
 @end

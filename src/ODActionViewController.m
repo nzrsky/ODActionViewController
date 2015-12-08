@@ -60,17 +60,17 @@ static CGFloat const kActionTableCellSeparatorWhite = 0.93f;
     if ((self = [super initWithStyle:UITableViewCellStyleDefault reuseIdentifier:reuseIdentifier])) {
         _defaultFont = self.textLabel.font;
         _boldFont = [UIFont boldSystemFontOfSize:self.textLabel.font.pointSize];
-        
+
         self.textLabel.textAlignment = NSTextAlignmentCenter;
         self.textLabel.adjustsFontSizeToFitWidth = YES;
         self.textLabel.font = _defaultFont;
-        
+
         _separator = [[UIView alloc] initWithFrame:(CGRect){kActionTableCellSeparatorInset, 0, self.frame.size.width - 2*kActionTableCellSeparatorInset, 1}];
         _separator.backgroundColor = [UIColor colorWithWhite:kActionTableCellSeparatorWhite alpha:1];
         _separator.autoresizingMask = UIViewAutoresizingFlexibleWidth;
         _separator.hidden = YES;
         [self addSubview:_separator];
-        
+
         self.backgroundColor = [UIColor colorWithWhite:1 alpha:kActionTableCellAlpha];
     }
     return self;
@@ -88,7 +88,7 @@ static CGFloat const kActionTableCellSeparatorWhite = 0.93f;
 
 - (void)setItem:(ODActionControllerItem *)item {
     _item = item;
-    
+
     self.textLabel.text = item.title;
     self.bold = item.isBold;
 }
@@ -108,31 +108,31 @@ static CGFloat const kActionTableCellSeparatorWhite = 0.93f;
                            cancelButtonTitle:(nonnull NSString *)cancelButtonTitle {
     if ((self = [self initWithNibName:nil bundle:nil])) {
         _items = items;
-        
+
         if (cancelButtonTitle) {
             __weak __typeof(self) self_weak_ = self;
             ODActionControllerItem *cancelItem = [ODActionControllerItem itemWithTitle:NSLocalizedString(@"Cancel", @"Cancel button") block:^(id sender){
                 [self_weak_ dismissController];
             }];
             cancelItem.bold = YES;
-            
+
             _items = [_items arrayByAddingObject:cancelItem];
         }
-        
+
         self.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
         if (NSFoundationVersionNumber >= NSFoundationVersionNumber_iOS_8_0) {
             self.modalPresentationStyle = UIModalPresentationOverCurrentContext;
         }
     }
-    
+
     return self;
 }
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
+
     self.automaticallyAdjustsScrollViewInsets = NO;
-    
+
     CGRect rect = self.view.bounds;
     UIView *headerView = [[UIView alloc] initWithFrame:rect];
     headerView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
@@ -141,7 +141,7 @@ static CGFloat const kActionTableCellSeparatorWhite = 0.93f;
 
     rect.size.height += [self calculateTableHeight];
     rect.origin.y = 0;
-    
+
     _tableView = [[UITableView alloc] initWithFrame:rect style:UITableViewStyleGrouped];
     _tableView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
     _tableView.delegate = self;
@@ -153,15 +153,15 @@ static CGFloat const kActionTableCellSeparatorWhite = 0.93f;
     _tableView.sectionHeaderHeight = 0;
     _tableView.sectionFooterHeight = kActionTableCellSpacing;
     _tableView.separatorColor = [UIColor clearColor];
-    
+
     [_tableView registerClass:ODActionViewCell.class forCellReuseIdentifier:NSStringFromClass(ODActionViewCell.class)];
-    
+
     for (ODActionControllerItem *item in self.items) {
         if (item.customCellClass) {
             [_tableView registerClass:item.customCellClass forCellReuseIdentifier:NSStringFromClass(item.customCellClass)];
         }
     }
-    
+
     [self.view addSubview:_tableView];
 
     rect.origin.y = self.view.bounds.size.height;
@@ -229,7 +229,7 @@ static CGFloat const kActionTableCellSeparatorWhite = 0.93f;
     CGRect rc = _tableView.frame;
     rc.origin.y = offset;
     _tableView.frame = rc;
-    
+
     rc.size.height -= self.view.bounds.size.height;
     rc.origin.y += self.view.bounds.size.height;
     _blurredBackground.frame = rc;
@@ -271,7 +271,7 @@ static CGFloat const kActionTableCellSeparatorWhite = 0.93f;
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     ODActionControllerItem *item = [self itemWithIndexPath:indexPath];
-    
+
     ODActionViewCell *cell = [tableView dequeueReusableCellWithIdentifier:NSStringFromClass(item.customCellClass ?: ODActionViewCell.class)
                                                              forIndexPath:indexPath];
     cell.item = item;
@@ -283,9 +283,9 @@ static CGFloat const kActionTableCellSeparatorWhite = 0.93f;
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
-    
+
     ODActionControllerItem *item = [self itemWithIndexPath:indexPath];
-    
+
     if (!item.isDisabled && item.block) {
         item.block(item);
     }
@@ -297,32 +297,13 @@ static CGFloat const kActionTableCellSeparatorWhite = 0.93f;
 
 - (void)od_presentActionViewController:(UIViewController *)viewControllerToPresent
                               animated:(BOOL)animated completion:(void (^)(void))completion {
-//    UINavigationController *nc = [[UINavigationController alloc] initWithRootViewController:viewControllerToPresent];
-//    
-//    if (NSFoundationVersionNumber > NSFoundationVersionNumber_iOS_8_0) {
-//        nc.providesPresentationContextTransitionStyle = YES;
-//        nc.definesPresentationContext = YES;
-//        nc.modalPresentationStyle = UIModalPresentationOverCurrentContext;
-//        [self presentViewController:nc animated:NO completion:completion];
-//    } else {
-//        id<UIApplicationDelegate> appDelegate = (id<UIApplicationDelegate>)[[UIApplication sharedApplication] delegate];
-//        [self presentViewController:nc animated:NO completion:^{
-//            [nc dismissViewControllerAnimated:NO completion:^{
-//                UIModalPresentationStyle _style = appDelegate.window.rootViewController.modalPresentationStyle;
-//                appDelegate.window.rootViewController.modalPresentationStyle = UIModalPresentationCurrentContext;
-//                [self presentViewController:nc animated:NO completion:completion];
-//                appDelegate.window.rootViewController.modalPresentationStyle = _style;
-//            }];
-//        }];
-//    }
-
     if (NSFoundationVersionNumber < NSFoundationVersionNumber_iOS_8_0) {
         UIViewController *rootViewController = [UIApplication sharedApplication].delegate.window.rootViewController;
         rootViewController.modalPresentationStyle = UIModalPresentationCurrentContext;
 //        self.providesPresentationContextTransitionStyle = YES;
 //        self.definesPresentationContext = YES;
     }
-    
+
     [self presentViewController:viewControllerToPresent animated:animated completion:completion];
 }
 
