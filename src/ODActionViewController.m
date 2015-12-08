@@ -36,7 +36,7 @@ static CGFloat const kActionTableCellSeparatorWhite = 0.93f;
 
 @implementation ODActionControllerItem
 
-+ (nonnull instancetype)itemWithTitle:(nullable NSString *)title block:(nonnull odactionvcitem_block_t)block {
++ (nonnull instancetype)itemWithTitle:(nullable NSString *)title block:(nullable odactionvcitem_block_t)block {
     ODActionControllerItem *item = [[ODActionControllerItem alloc] init];
     item.title = title;
     item.block = block;
@@ -110,10 +110,10 @@ static CGFloat const kActionTableCellSeparatorWhite = 0.93f;
         _items = items;
 
         if (cancelButtonTitle) {
-            __weak __typeof(self) self_weak_ = self;
-            ODActionControllerItem *cancelItem = [ODActionControllerItem itemWithTitle:NSLocalizedString(@"Cancel", @"Cancel button") block:^(id sender){
+//            __weak __typeof(self) self_weak_ = self;
+            ODActionControllerItem *cancelItem = [ODActionControllerItem itemWithTitle:NSLocalizedString(@"Cancel", @"Cancel button") block:/*^(id sender){
                 [self_weak_ dismissController];
-            }];
+            }*/ nil];
             cancelItem.bold = YES;
 
             _items = [_items arrayByAddingObject:cancelItem];
@@ -286,13 +286,15 @@ static CGFloat const kActionTableCellSeparatorWhite = 0.93f;
 
     ODActionControllerItem *item = [self itemWithIndexPath:indexPath];
 
-    if (!item.isDisabled && item.block) {
+    if (item.isDisabled) return;
+    
+    if (item.block) {
         item.block(item);
-        
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self dismissController];
-        });
     }
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self dismissController];
+    });
 }
 
 @end

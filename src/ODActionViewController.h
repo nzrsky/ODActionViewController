@@ -42,7 +42,7 @@ typedef void(^odactionvcitem_block_t)(__kindof ODActionControllerItem * _Nonnull
 // Items for group section
 @property (nullable, nonatomic, strong) NSArray<ODActionControllerItem *> *subitems;
 
-+ (nonnull instancetype)itemWithTitle:(nullable NSString *)title block:(nonnull odactionvcitem_block_t)block;
++ (nonnull instancetype)itemWithTitle:(nullable NSString *)title block:(nullable odactionvcitem_block_t)block;
 @end
 
 
