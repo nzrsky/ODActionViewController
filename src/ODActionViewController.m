@@ -23,17 +23,19 @@
 
 #import "ODActionViewController.h"
 
-static CGFloat const kActionTableCellHeight = 47.0f;
-static CGFloat const kActionTableCellSpacing = 7.0f;
-static CGFloat const kActionTableBackgroundAlpha = 0.6f;
+static CGFloat const kODActionTableCellHeight = 47.0f;
+static CGFloat const kODActionTableCellSpacing = 7.0f;
+static CGFloat const kODActionTableBackgroundAlpha = 0.6f;
 
-static CGFloat const kActionTableCellSeparatorInset = 15.0f;
+static CGFloat const kODActionTableCellSeparatorInset = 15.0f;
 
-static CGFloat const kActionTableCellAlpha = 0.6f;
-static CGFloat const kActionTableCellSeparatorWhite = 0.93f;
+static CGFloat const kODActionTableCellAlpha = 0.6f;
+static CGFloat const kODActionTableCellSeparatorWhite = 0.93f;
 
-// TODO: - titles
+static CGFloat const kODActionTableHeaderViewHeight = 0.0f;
+static CGFloat const kODActionTableFooterViewHeight = kODActionTableCellSpacing;
 
+#pragma mark Item
 @implementation ODActionControllerItem
 
 + (nonnull instancetype)itemWithTitle:(nullable NSString *)title block:(nullable odactionvcitem_block_t)block {
@@ -45,6 +47,7 @@ static CGFloat const kActionTableCellSeparatorWhite = 0.93f;
 
 @end
 
+#pragma mark Cell
 @interface ODActionViewCell () {
     UIView *_separator;
     UIFont *_defaultFont;
@@ -65,13 +68,17 @@ static CGFloat const kActionTableCellSeparatorWhite = 0.93f;
         self.textLabel.adjustsFontSizeToFitWidth = YES;
         self.textLabel.font = _defaultFont;
 
-        _separator = [[UIView alloc] initWithFrame:(CGRect){kActionTableCellSeparatorInset, 0, self.frame.size.width - 2*kActionTableCellSeparatorInset, 1}];
-        _separator.backgroundColor = [UIColor colorWithWhite:kActionTableCellSeparatorWhite alpha:1];
+        _separator = [[UIView alloc] initWithFrame:(CGRect){ kODActionTableCellSeparatorInset,
+            0,
+            self.frame.size.width - 2*kODActionTableCellSeparatorInset,
+            1
+        }];
+        _separator.backgroundColor = [UIColor colorWithWhite:kODActionTableCellSeparatorWhite alpha:1];
         _separator.autoresizingMask = UIViewAutoresizingFlexibleWidth;
         _separator.hidden = YES;
         [self addSubview:_separator];
 
-        self.backgroundColor = [UIColor colorWithWhite:1 alpha:kActionTableCellAlpha];
+        self.backgroundColor = [UIColor colorWithWhite:1 alpha:kODActionTableCellAlpha];
     }
     return self;
 }
@@ -91,6 +98,46 @@ static CGFloat const kActionTableCellSeparatorWhite = 0.93f;
 
     self.textLabel.text = item.title;
     self.bold = item.isBold;
+}
+
+@end
+
+#pragma mark Section
+static CGFloat const kODActionViewSectionHeaderHeight = 30.0f;
+
+@interface ODActionViewSectionHeader : UITableViewHeaderFooterView
+@property (nonatomic, strong) NSString *title;
+@end
+
+@implementation ODActionViewSectionHeader {
+    UILabel *_label;
+}
+
+- (instancetype)initWithReuseIdentifier:(NSString *)reuseIdentifier {
+    self = [super initWithReuseIdentifier:reuseIdentifier];
+    if (self) {
+        self.contentView.backgroundColor = [UIColor clearColor];
+        CGRect labelFrame = self.bounds;
+        _label = [[UILabel alloc] initWithFrame:labelFrame];
+        _label.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
+        _label.textAlignment = NSTextAlignmentCenter;
+        _label.textColor = [UIButton new].tintColor;
+        _label.font = [UIFont systemFontOfSize:14];
+        [self.contentView addSubview:_label];
+    }
+    return self;
+}
+
+- (void)setTitle:(NSString *)title {
+    _label.text = title;
+}
+
+- (NSString *)title {
+    return _label.text;
+}
+
++ (CGFloat)defaultHeight {
+    return kODActionViewSectionHeaderHeight;
 }
 
 @end
@@ -136,7 +183,7 @@ static CGFloat const kActionTableCellSeparatorWhite = 0.93f;
     CGRect rect = self.view.bounds;
     UIView *headerView = [[UIView alloc] initWithFrame:rect];
     headerView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    headerView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:kActionTableBackgroundAlpha];
+    headerView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:kODActionTableBackgroundAlpha];
     [headerView addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(dismissController)]];
 
     rect.size.height += [self calculateTableHeight];
@@ -150,12 +197,13 @@ static CGFloat const kActionTableCellSeparatorWhite = 0.93f;
     _tableView.tableHeaderView = headerView;
     _tableView.tableFooterView = [UIView new];
     _tableView.backgroundColor = [UIColor clearColor];
-    _tableView.sectionHeaderHeight = 0;
-    _tableView.sectionFooterHeight = kActionTableCellSpacing;
+    _tableView.sectionHeaderHeight = kODActionTableHeaderViewHeight;
+    _tableView.sectionFooterHeight = kODActionTableFooterViewHeight;
     _tableView.separatorColor = [UIColor clearColor];
 
     [_tableView registerClass:ODActionViewCell.class forCellReuseIdentifier:NSStringFromClass(ODActionViewCell.class)];
-
+    [_tableView registerClass:ODActionViewSectionHeader.class forHeaderFooterViewReuseIdentifier:NSStringFromClass(ODActionViewSectionHeader.class)];
+    
     for (ODActionControllerItem *item in self.items) {
         if (item.customCellClass) {
             [_tableView registerClass:item.customCellClass forCellReuseIdentifier:NSStringFromClass(item.customCellClass)];
@@ -218,9 +266,10 @@ static CGFloat const kActionTableCellSeparatorWhite = 0.93f;
 }
 
 - (CGFloat)calculateTableHeight {
-    CGFloat h = (self.items.count) * (kActionTableCellSpacing);
+    CGFloat h = (self.items.count) * (kODActionTableCellSpacing);
     for (ODActionControllerItem *item in self.items) {
-        h += (item.subitems ? item.subitems.count : 1)*kActionTableCellHeight;
+        h += (item.subitems ? item.subitems.count : 1)*kODActionTableCellHeight +
+             ((item.subitems && item.title) ? [ODActionViewSectionHeader defaultHeight] : kODActionTableHeaderViewHeight);
     }
     return h;
 }
@@ -237,7 +286,7 @@ static CGFloat const kActionTableCellSeparatorWhite = 0.93f;
 
 #pragma mark - Table
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
-    return kActionTableCellHeight;
+    return kODActionTableCellHeight;
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
@@ -245,9 +294,21 @@ static CGFloat const kActionTableCellSeparatorWhite = 0.93f;
 }
 
 - (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section {
-    UIView *v = [[UIView alloc] initWithFrame:CGRectZero];
-    v.backgroundColor = [UIColor clearColor];
-    return v;
+    ODActionControllerItem *item = self.items[section];
+    if (item.subitems && item.title) {
+        ODActionViewSectionHeader *view = (id)[tableView dequeueReusableHeaderFooterViewWithIdentifier:NSStringFromClass(ODActionViewSectionHeader.class)];
+        view.title = item.title;
+        return view;
+    } else {
+        UIView *v = [[UIView alloc] initWithFrame:CGRectZero];
+        v.backgroundColor = [UIColor clearColor];
+        return v;
+    }
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
+    ODActionControllerItem *item = self.items[section];
+    return (item.subitems && item.title) ? [ODActionViewSectionHeader defaultHeight] : kODActionTableHeaderViewHeight;
 }
 
 - (UIView *)tableView:(UITableView *)tableView viewForFooterInSection:(NSInteger)section {
