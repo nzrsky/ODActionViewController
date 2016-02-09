@@ -106,6 +106,7 @@ static CGFloat const kODActionTableFooterViewHeight = kODActionTableCellSpacing;
 static CGFloat const kODActionViewSectionHeaderHeight = 30.0f;
 static CGFloat const kODActionViewControllerAppearanceAnimationDuration = 0.2f;
 static CGFloat const kODActionViewControllerBackgroundAlpha = 0.5f;
+static CGFloat const kODActionViewControllerItemsFontSize = 14.0f;
 
 @interface ODActionViewSectionHeader : UITableViewHeaderFooterView
 @property (nonatomic, strong) NSString *title;
@@ -124,7 +125,7 @@ static CGFloat const kODActionViewControllerBackgroundAlpha = 0.5f;
         _label.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
         _label.textAlignment = NSTextAlignmentCenter;
         _label.textColor = [UIButton new].tintColor;
-        _label.font = [UIFont systemFontOfSize:14];
+        _label.font = [UIFont systemFontOfSize:kODActionViewControllerItemsFontSize];
         [self.contentView addSubview:_label];
     }
     return self;
