@@ -104,6 +104,8 @@ static CGFloat const kODActionTableFooterViewHeight = kODActionTableCellSpacing;
 
 #pragma mark Section
 static CGFloat const kODActionViewSectionHeaderHeight = 30.0f;
+static CGFloat const kODActionViewControllerAppearanceAnimationDuration = 0.2f;
+static CGFloat const kODActionViewControllerBackgroundAlpha = 0.5f;
 
 @interface ODActionViewSectionHeader : UITableViewHeaderFooterView
 @property (nonatomic, strong) NSString *title;
@@ -226,7 +228,7 @@ static CGFloat const kODActionViewSectionHeaderHeight = 30.0f;
         } else {
             blurredView = [[UIView alloc] init];
             blurredView.backgroundColor = [UIColor lightGrayColor];
-            blurredView.alpha = 0.5;
+            blurredView.alpha = kODActionViewControllerBackgroundAlpha;
         }
         blurredView.frame = rect;
         blurredView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
@@ -244,7 +246,10 @@ static CGFloat const kODActionViewSectionHeaderHeight = 30.0f;
     CGFloat newOffset = self.view.bounds.size.height - _tableView.frame.size.height;
     [self setTableOffset:0];
     _tableView.tableHeaderView.alpha = 0;
-    [UIView animateWithDuration:0.2 delay:0 options:UIViewAnimationOptionBeginFromCurrentState animations:^{
+    [UIView animateWithDuration:kODActionViewControllerAppearanceAnimationDuration
+                          delay:0
+                        options:UIViewAnimationOptionBeginFromCurrentState
+                     animations:^{
         _tableView.tableHeaderView.alpha = 1;
         [self setTableOffset:newOffset];
     } completion:nil];
@@ -257,7 +262,10 @@ static CGFloat const kODActionViewSectionHeaderHeight = 30.0f;
 
 - (void)dismissController {
     CGFloat newOffset = 0;
-    [UIView animateWithDuration:0.2 delay:0 options:UIViewAnimationOptionBeginFromCurrentState animations:^{
+    [UIView animateWithDuration:kODActionViewControllerAppearanceAnimationDuration
+                          delay:0
+                        options:UIViewAnimationOptionBeginFromCurrentState
+                     animations:^{
         _tableView.tableHeaderView.alpha = 0;
         [self setTableOffset:newOffset];
     } completion:^(BOOL finished) {
