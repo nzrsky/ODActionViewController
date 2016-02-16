@@ -155,7 +155,7 @@ static CGFloat const kODActionViewControllerItemsFontSize = 14.0f;
 }
 
 - (nullable instancetype)initWithActionItems:(nonnull NSArray<ODActionControllerItem *> *)items
-                           cancelButtonTitle:(nonnull NSString *)cancelButtonTitle {
+                           cancelButtonTitle:(nullable NSString *)cancelButtonTitle {
     if ((self = [self initWithNibName:nil bundle:nil])) {
         _items = items;
 
