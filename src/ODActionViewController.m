@@ -208,9 +208,7 @@ static CGFloat const kODActionViewControllerItemsFontSize = 14.0f;
     [_tableView registerClass:ODActionViewSectionHeader.class forHeaderFooterViewReuseIdentifier:NSStringFromClass(ODActionViewSectionHeader.class)];
     
     for (ODActionControllerItem *item in self.items) {
-        if (item.customCellClass) {
-            [_tableView registerClass:item.customCellClass forCellReuseIdentifier:NSStringFromClass(item.customCellClass)];
-        }
+        [self registerCustomClassesFromItem:item];
     }
 
     [self.view addSubview:_tableView];
@@ -272,6 +270,16 @@ static CGFloat const kODActionViewControllerItemsFontSize = 14.0f;
     } completion:^(BOOL finished) {
         [self dismissViewControllerAnimated:NO completion:nil];
     }];
+}
+
+- (void)registerCustomClassesFromItem:(ODActionControllerItem *)item {
+    if (item.customCellClass) {
+        [_tableView registerClass:item.customCellClass forCellReuseIdentifier:NSStringFromClass(item.customCellClass)];
+    }
+    
+    for (ODActionControllerItem *subitem in item.subitems) {
+        [self registerCustomClassesFromItem:subitem];
+    }
 }
 
 - (CGFloat)calculateTableHeight {
