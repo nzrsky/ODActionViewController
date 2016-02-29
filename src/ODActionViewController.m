@@ -262,16 +262,24 @@ static CGFloat const kODActionViewControllerItemsFontSize = 14.0f;
 }
 
 - (void)dismissController {
+    [self dismissControllerWithBlock:nil];
+}
+
+- (void)dismissControllerWithBlock:(nullable void(^)())block {
     CGFloat newOffset = 0;
     [UIView animateWithDuration:kODActionViewControllerAppearanceAnimationDuration
                           delay:0
                         options:UIViewAnimationOptionBeginFromCurrentState
                      animations:^{
-        _tableView.tableHeaderView.alpha = 0;
-        [self setTableOffset:newOffset];
-    } completion:^(BOOL finished) {
-        [self dismissViewControllerAnimated:NO completion:nil];
-    }];
+                         _tableView.tableHeaderView.alpha = 0;
+                         [self setTableOffset:newOffset];
+                     }
+                     completion:^(BOOL finished) {
+                         [self dismissViewControllerAnimated:NO completion:nil];
+                         if (block) {
+                             block();
+                         }
+                     }];
 }
 
 - (CGFloat)calculateTableHeight {
@@ -358,12 +366,15 @@ static CGFloat const kODActionViewControllerItemsFontSize = 14.0f;
 
     if (item.isDisabled) return;
     
+    void (^finishedBlock)();
     if (item.block) {
-        item.block(item);
+        finishedBlock = ^{
+            item.block(item);
+        };
     }
     
     dispatch_async(dispatch_get_main_queue(), ^{
-        [self dismissController];
+        [self dismissControllerWithBlock:finishedBlock];
     });
 }
 
