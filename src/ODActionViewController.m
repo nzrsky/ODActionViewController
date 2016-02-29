@@ -356,15 +356,16 @@ static CGFloat const kODActionViewControllerItemsFontSize = 14.0f;
     cell.textLabel.textColor = (item.disabled) ? [UIColor lightGrayColor] : ((item.destructive) ? [UIColor redColor] : self.view.tintColor);
     cell.showTopSeparator = indexPath.row > 0;
     cell.actionDelegate = self;
+    cell.selectionStyle = (item.disabled) ? UITableViewCellSelectionStyleNone : UITableViewCellSelectionStyleDefault;
     return cell;
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-    [tableView deselectRowAtIndexPath:indexPath animated:YES];
-
     ODActionControllerItem *item = [self itemWithIndexPath:indexPath];
 
     if (item.isDisabled) return;
+    
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
     
     void (^finishedBlock)();
     if (item.block) {
