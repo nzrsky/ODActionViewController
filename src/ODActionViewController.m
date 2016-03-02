@@ -291,7 +291,7 @@ static CGFloat const kODActionViewControllerItemsFontSize = 14.0f;
 }
 
 - (CGFloat)calculateTableHeight {
-    CGFloat h = (self.items.count) * (kODActionTableCellSpacing);
+    CGFloat h = (self.items.count - 1) * (kODActionTableCellSpacing);
     for (ODActionControllerItem *item in self.items) {
         h += (item.subitems ? item.subitems.count : 1)*kODActionTableCellHeight +
              ((item.subitems && item.title) ? [ODActionViewSectionHeader defaultHeight] : kODActionTableHeaderViewHeight);
