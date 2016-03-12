@@ -31,6 +31,7 @@ static CGFloat const kODActionTableCellSeparatorInset = 15.0f;
 
 static CGFloat const kODActionTableCellAlpha = 0.6f;
 static CGFloat const kODActionTableCellSeparatorWhite = 0.93f;
+static CGFloat const kODActionTableCellSeparatorAlpha = 0.5f;
 
 static CGFloat const kODActionTableHeaderViewHeight = 0.0f;
 static CGFloat const kODActionTableFooterViewHeight = kODActionTableCellSpacing;
@@ -67,25 +68,38 @@ static CGFloat const kODActionTableFooterViewHeight = kODActionTableCellSpacing;
         self.textLabel.textAlignment = NSTextAlignmentCenter;
         self.textLabel.adjustsFontSizeToFitWidth = YES;
         self.textLabel.font = _defaultFont;
-
-        _separator = [[UIView alloc] initWithFrame:(CGRect){ kODActionTableCellSeparatorInset,
-            0,
-            self.frame.size.width - 2*kODActionTableCellSeparatorInset,
-            1
-        }];
-        _separator.backgroundColor = [UIColor colorWithWhite:kODActionTableCellSeparatorWhite alpha:1];
-        _separator.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-        _separator.hidden = YES;
-        [self addSubview:_separator];
-
         self.backgroundColor = [UIColor colorWithWhite:1 alpha:kODActionTableCellAlpha];
     }
     return self;
 }
 
-- (void)setShowTopSeparator:(BOOL)show {
-    _showTopSeparator = show;
-    _separator.hidden = !show;
+- (void)addSeparatorWithEffect:(UIBlurEffect *)effect {
+    if( !_separator ) {
+        UIVisualEffect *vibrancyEffect = [UIVibrancyEffect effectForBlurEffect:effect];
+        UIVisualEffectView *separatorEffectView = [[UIVisualEffectView alloc] initWithEffect:vibrancyEffect];
+        separatorEffectView.frame = (CGRect){ kODActionTableCellSeparatorInset,
+            0,
+            self.frame.size.width - 2*kODActionTableCellSeparatorInset,
+            1
+        };
+        separatorEffectView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+        
+        UIView *separator = [[UIView alloc] initWithFrame:separatorEffectView.bounds];
+        separator.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+        separator.backgroundColor = [UIColor colorWithWhite:kODActionTableCellSeparatorWhite
+                                                      alpha:kODActionTableCellSeparatorAlpha];
+        [separatorEffectView.contentView addSubview:separator];
+        
+        _separator = separatorEffectView;
+        [self addSubview:_separator];
+    }
+}
+
+- (void)removeSeparator {
+    if( _separator ) {
+        [_separator removeFromSuperview];
+        _separator = nil;
+    }
 }
 
 - (void)setBold:(BOOL)bold {
@@ -104,8 +118,9 @@ static CGFloat const kODActionTableFooterViewHeight = kODActionTableCellSpacing;
 
 #pragma mark Section
 static CGFloat const kODActionViewSectionHeaderHeight = 30.0f;
+static CGFloat const kODActionViewSectionHeaderWhite = 0.01f;
+static CGFloat const kODActionViewSectionHeaderAlpha = 0.35f;
 static CGFloat const kODActionViewControllerAppearanceAnimationDuration = 0.2f;
-static CGFloat const kODActionViewControllerBackgroundAlpha = 0.5f;
 static CGFloat const kODActionViewControllerItemsFontSize = 14.0f;
 
 @interface ODActionViewSectionHeader : UITableViewHeaderFooterView
@@ -119,12 +134,14 @@ static CGFloat const kODActionViewControllerItemsFontSize = 14.0f;
 - (instancetype)initWithReuseIdentifier:(NSString *)reuseIdentifier {
     self = [super initWithReuseIdentifier:reuseIdentifier];
     if (self) {
-        self.contentView.backgroundColor = [UIColor clearColor];
+        self.contentView.backgroundColor = [UIColor colorWithWhite:kODActionViewSectionHeaderWhite
+                                                             alpha:kODActionViewSectionHeaderAlpha];
+        
         CGRect labelFrame = self.bounds;
         _label = [[UILabel alloc] initWithFrame:labelFrame];
         _label.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
         _label.textAlignment = NSTextAlignmentCenter;
-        _label.textColor = [UIButton new].tintColor;
+        _label.textColor = [UIColor lightGrayColor];
         _label.font = [UIFont systemFontOfSize:kODActionViewControllerItemsFontSize];
         [self.contentView addSubview:_label];
     }
@@ -152,10 +169,11 @@ static CGFloat const kODActionViewControllerItemsFontSize = 14.0f;
 @implementation ODActionViewController {
     UITableView *_tableView;
     UIView *_blurredBackground;
+    UIBlurEffect *_blurEffect;
 }
 
 - (nullable instancetype)initWithActionItems:(nonnull NSArray<ODActionControllerItem *> *)items
-                           cancelButtonTitle:(nonnull NSString *)cancelButtonTitle {
+                           cancelButtonTitle:(nullable NSString *)cancelButtonTitle {
     if ((self = [self initWithNibName:nil bundle:nil])) {
         _items = items;
 
@@ -208,9 +226,7 @@ static CGFloat const kODActionViewControllerItemsFontSize = 14.0f;
     [_tableView registerClass:ODActionViewSectionHeader.class forHeaderFooterViewReuseIdentifier:NSStringFromClass(ODActionViewSectionHeader.class)];
     
     for (ODActionControllerItem *item in self.items) {
-        if (item.customCellClass) {
-            [_tableView registerClass:item.customCellClass forCellReuseIdentifier:NSStringFromClass(item.customCellClass)];
-        }
+        [self registerCustomClassesFromItem:item];
     }
 
     [self.view addSubview:_tableView];
@@ -222,15 +238,8 @@ static CGFloat const kODActionViewControllerItemsFontSize = 14.0f;
 
 - (UIView *)blurredViewWithRect:(CGRect)rect {
     if (NSFoundationVersionNumber > NSFoundationVersionNumber_iOS_8_0) {
-        UIView *blurredView = nil;
-        if (!UIAccessibilityIsReduceTransparencyEnabled()) {
-            UIBlurEffect *effect = [UIBlurEffect effectWithStyle:UIBlurEffectStyleExtraLight];
-            blurredView = [[UIVisualEffectView alloc] initWithEffect:effect];
-        } else {
-            blurredView = [[UIView alloc] init];
-            blurredView.backgroundColor = [UIColor lightGrayColor];
-            blurredView.alpha = kODActionViewControllerBackgroundAlpha;
-        }
+        _blurEffect = [UIBlurEffect effectWithStyle:UIBlurEffectStyleDark];
+        UIView *blurredView = [[UIVisualEffectView alloc] initWithEffect:_blurEffect];
         blurredView.frame = rect;
         blurredView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
         return blurredView;
@@ -262,20 +271,38 @@ static CGFloat const kODActionViewControllerItemsFontSize = 14.0f;
 }
 
 - (void)dismissController {
+    [self dismissControllerWithBlock:nil];
+}
+
+- (void)registerCustomClassesFromItem:(ODActionControllerItem*)item {
+    if (item.customCellClass) {
+        [_tableView registerClass:item.customCellClass forCellReuseIdentifier:NSStringFromClass(item.customCellClass)];
+    }
+    
+    for (ODActionControllerItem *subitem in item.subitems) {
+        [self registerCustomClassesFromItem:subitem];
+    }
+}
+
+- (void)dismissControllerWithBlock:(nullable void(^)())block {
     CGFloat newOffset = 0;
     [UIView animateWithDuration:kODActionViewControllerAppearanceAnimationDuration
                           delay:0
                         options:UIViewAnimationOptionBeginFromCurrentState
                      animations:^{
-        _tableView.tableHeaderView.alpha = 0;
-        [self setTableOffset:newOffset];
-    } completion:^(BOOL finished) {
-        [self dismissViewControllerAnimated:NO completion:nil];
-    }];
+                         _tableView.tableHeaderView.alpha = 0;
+                         [self setTableOffset:newOffset];
+                     }
+                     completion:^(BOOL finished) {
+                         [self dismissViewControllerAnimated:NO completion:nil];
+                         if (block) {
+                             block();
+                         }
+                     }];
 }
 
 - (CGFloat)calculateTableHeight {
-    CGFloat h = (self.items.count) * (kODActionTableCellSpacing);
+    CGFloat h = (self.items.count - 1) * (kODActionTableCellSpacing);
     for (ODActionControllerItem *item in self.items) {
         h += (item.subitems ? item.subitems.count : 1)*kODActionTableCellHeight +
              ((item.subitems && item.title) ? [ODActionViewSectionHeader defaultHeight] : kODActionTableHeaderViewHeight);
@@ -345,25 +372,35 @@ static CGFloat const kODActionViewControllerItemsFontSize = 14.0f;
     ODActionViewCell *cell = [tableView dequeueReusableCellWithIdentifier:NSStringFromClass(item.customCellClass ?: ODActionViewCell.class)
                                                              forIndexPath:indexPath];
     cell.item = item;
-    cell.textLabel.textColor = (item.disabled) ? [UIColor lightGrayColor] : ((item.destructive) ? [UIColor redColor] : self.view.tintColor);
-    cell.showTopSeparator = indexPath.row > 0;
+    cell.textLabel.textColor = (item.disabled) ? [UIColor darkGrayColor] : ((item.destructive) ? [UIColor redColor] : self.view.tintColor);
     cell.actionDelegate = self;
+    cell.selectionStyle = (item.disabled) ? UITableViewCellSelectionStyleNone : UITableViewCellSelectionStyleDefault;
+    
+    if( indexPath.row > 0 ) {
+        [cell addSeparatorWithEffect:_blurEffect];
+    } else {
+        [cell removeSeparator];
+    }
+    
     return cell;
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-    [tableView deselectRowAtIndexPath:indexPath animated:YES];
-
     ODActionControllerItem *item = [self itemWithIndexPath:indexPath];
 
     if (item.isDisabled) return;
     
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    
+    void (^finishedBlock)();
     if (item.block) {
-        item.block(item);
+        finishedBlock = ^{
+            item.block(item);
+        };
     }
     
     dispatch_async(dispatch_get_main_queue(), ^{
-        [self dismissController];
+        [self dismissControllerWithBlock:finishedBlock];
     });
 }
 
