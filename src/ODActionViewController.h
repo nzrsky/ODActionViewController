@@ -48,7 +48,7 @@ typedef void(^odactionvcitem_block_t)(__kindof ODActionControllerItem * _Nonnull
 
 @interface ODActionViewController: UIViewController
 - (nullable instancetype)initWithActionItems:(nonnull NSArray<ODActionControllerItem *> *)items
-                           cancelButtonTitle:(nonnull NSString *)cancelButtonTitle;
+                           cancelButtonTitle:(nullable NSString *)cancelButtonTitle;
 - (void)dismissController;
 @end
 
